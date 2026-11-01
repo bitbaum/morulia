@@ -32,8 +32,10 @@ export const CLIENT_APPS: readonly ClientApp[] = [
   { id: "diplodoctor", name: "Diplodoctor", origin: "https://diplodoctor.orangecat.ch" },
   { id: "heidi", name: "Heidi", origin: "https://heidi.orangecat.ch" },
   { id: "hirnli", name: "hirnli", origin: "https://hirnli.orangecat.ch" },
+  { id: "petvity", name: "Petvity", origin: "https://petvity.orangecat.ch" },
   { id: "solon", name: "Solon", origin: "https://solon.orangecat.ch" },
   { id: "substrata", name: "Substrata", origin: "https://substrata.orangecat.ch" },
+  { id: "surf-your-life", name: "Surf Your Life", origin: "https://surf-your-life.orangecat.ch" },
 ];
 
 export const CALLBACK_PATH = `/api/auth/callback/${SIGNIN_PROVIDER_ID}`;
