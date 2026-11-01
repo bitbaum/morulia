@@ -19,7 +19,7 @@ jobs:
     if: github.event_name == 'workflow_dispatch' || (github.event.workflow_run.conclusion == 'success' && github.event.workflow_run.event != 'pull_request')
     uses: bitbaum/loki/.github/workflows/selfhost-deploy.yml@main
     with:
-      app: signin
+      app: morulia
       git-ref: ${{ github.event.workflow_run.head_sha }}
     secrets:
       HETZNER_SSH_PRIVATE_KEY: ${{ secrets.HETZNER_SSH_PRIVATE_KEY }}

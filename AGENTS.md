@@ -39,9 +39,9 @@ into this file.
 
 <!-- fleet:rules:end -->
 
-# signin
+# Morulia
 
-The shared bitbaum sign-in (fleet `STACK.md`, "Identity"): one OIDC provider
+The shared bitbaum sign-in, served at `morulia.orangecat.ch` (fleet `STACK.md`, "Identity"): one OIDC provider
 that holds the Google, Apple, GitHub, X and Meta credentials once. Every
 accountkit app is a client of it through `SIGNIN_ISSUER`, `SIGNIN_CLIENT_ID`
 and `SIGNIN_CLIENT_SECRET`.

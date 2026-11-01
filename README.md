@@ -1,7 +1,9 @@
-# signin
+# Morulia
 
-One sign-in for bitbaum apps: "Continue with Google, Apple, GitHub, X or
-Facebook", run once for every app.
+The shared bitbaum sign-in, at https://morulia.orangecat.ch (first named
+`signin`; renamed on 2026-11-01 before any app used it). One sign-in for
+bitbaum apps: "Continue with Google, Apple, GitHub, X or Facebook", run once
+for every app.
 
 - **Each app sees a different identifier** for the same person (an OIDC
   pairwise subject), so two apps cannot join their records on it.
@@ -12,9 +14,12 @@ Facebook", run once for every app.
 
 Apps connect with three env values, read by `@bitbaum/accountkit/auth`:
 
-    SIGNIN_ISSUER=<this service's origin>
+    SIGNIN_ISSUER=https://morulia.orangecat.ch
     SIGNIN_CLIENT_ID=<the app's id in lib/clients.ts>
     SIGNIN_CLIENT_SECRET=<written on the box, same as SIGNIN_CLIENT_SECRET_<ID> here>
+
+The `SIGNIN_*` names are generic and stay as they are. Apps still label the
+button "Sign in with OrangeCat"; nothing user-facing says Morulia.
 
 Endpoints: `/.well-known/openid-configuration`, `/api/auth/oauth2/authorize`
 (PKCE S256 required), `/api/auth/oauth2/token` (`client_secret_post`),
