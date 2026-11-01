@@ -20,7 +20,7 @@ const DEV_PAIRWISE = "development-only-pairwise-secret-not-for-production";
 const DEV_URL = "http://localhost:3000";
 
 export interface SigninConfig {
-  /** Public origin and OIDC issuer, e.g. https://signin.example. */
+  /** Public origin and OIDC issuer, e.g. https://morulia.orangecat.ch. */
   url: string;
   secret: string;
   pairwiseSecret: string;

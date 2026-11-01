@@ -13,9 +13,9 @@ export async function register() {
   try {
     const result = await syncClients(await getAuth(), CLIENT_APPS);
     console.info(
-      `[signin] clients active: ${result.active.join(", ") || "none"}; waiting for a secret: ${result.waiting.join(", ") || "none"}; retired: ${result.retired.join(", ") || "none"}`,
+      `[morulia] clients active: ${result.active.join(", ") || "none"}; waiting for a secret: ${result.waiting.join(", ") || "none"}; retired: ${result.retired.join(", ") || "none"}`,
     );
   } catch (error) {
-    console.error(`[signin] client sync failed: ${(error as Error).message}`);
+    console.error(`[morulia] client sync failed: ${(error as Error).message}`);
   }
 }
