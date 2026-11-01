@@ -17,7 +17,7 @@ export const ERROR_PAGE = "/problem";
 
 /**
  * How a client secret is kept: SHA-256, never the secret itself. Stated here
- * (rather than left to the plugin's default) because `clients:sync` writes
+ * (rather than left to the plugin's default) because `syncClients` (lib/sync-clients.ts) writes
  * the registry's rows and must store the secret the same way.
  */
 export function hashClientSecret(secret: string): string {
@@ -130,7 +130,7 @@ export async function createSigninAuth(options: CreateSigninAuthOptions) {
         pairwiseSecret: config.pairwiseSecret,
         grantTypes: ["authorization_code", "refresh_token"],
         allowDynamicClientRegistration: false,
-        // Clients are the registry's rows (lib/clients.ts, clients:sync).
+        // Clients are the registry's rows (lib/clients.ts, lib/sync-clients.ts).
         storeClientSecret: { hash: async (secret: string) => hashClientSecret(secret) },
         customUserInfoClaims: ({ user, jwt: token }) => {
           const clientId = String(token.client_id ?? token.azp ?? "");
