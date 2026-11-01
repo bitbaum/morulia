@@ -19,7 +19,7 @@
   },
   "dependencies": {
     "@better-auth/oauth-provider": "1.7.14",
-    "@bitbaum/accountkit": "^0.18.0",
+    "@bitbaum/accountkit": "github:bitbaum/accountkit#4e6451e690b20b17bfa1ec32acc74b152b19780a",
     "@bitbaum/design-tokens": "^1.2.0",
     "better-auth": "1.7.14",
     "drizzle-orm": "0.45.4",
