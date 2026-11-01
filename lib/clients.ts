@@ -11,11 +11,16 @@ import { SIGNIN_PROVIDER_ID } from "@bitbaum/accountkit/auth";
  *
  * The redirect URI is the one accountkit's generic OIDC provider sends:
  * `<origin>/api/auth/callback/bitbaum-signin`. The `id` is the app's
- * SIGNIN_CLIENT_ID; its secret is minted by `pnpm run clients:sync` and
- * printed once.
+ * SIGNIN_CLIENT_ID. Its secret is written on the box by loki
+ * `app-secrets.sh` into both env files (SIGNIN_CLIENT_SECRET_<ID> here,
+ * SIGNIN_CLIENT_SECRET there) and is never printed; lib/sync-clients.ts
+ * stores its hash at start. A row without a secret yet is stored switched off.
  *
- * Hosts come from bitbaum/loki scripts/hetzner/apps.conf (the serve register).
- * Adding an app is one row here, then the sync on the box.
+ * Hosts come from bitbaum/loki scripts/hetzner/apps.conf (the serve register):
+ * each app's address, which for vitareba is vita.orangecat.ch. The list is
+ * every fleet app with a sign-in page (fleet docs/auth-parity-2026-11-01.md),
+ * whatever its runtime, so the client exists before the app wires the button.
+ * Adding an app is one row here and one pair row in loki app-secrets.sh.
  */
 export interface ClientApp {
   /** SIGNIN_CLIENT_ID in the app's env; the apps.conf key or repo slug. */
@@ -27,15 +32,26 @@ export interface ClientApp {
 }
 
 export const CLIENT_APPS: readonly ClientApp[] = [
+  { id: "aoz-begleitung", name: "AOZ Begleitung", origin: "https://aoz.orangecat.ch" },
   { id: "biaslens", name: "BiasLens", origin: "https://biaslens.orangecat.ch" },
+  { id: "botsmann", name: "Botsmann", origin: "https://botsmann.orangecat.ch" },
   { id: "causius", name: "Causius", origin: "https://causius.orangecat.ch" },
+  { id: "datacat", name: "DataCat", origin: "https://datacat.orangecat.ch" },
   { id: "diplodoctor", name: "Diplodoctor", origin: "https://diplodoctor.orangecat.ch" },
+  { id: "evig", name: "evig", origin: "https://evig.orangecat.ch" },
   { id: "heidi", name: "Heidi", origin: "https://heidi.orangecat.ch" },
   { id: "hirnli", name: "hirnli", origin: "https://hirnli.orangecat.ch" },
+  { id: "keller", name: "Keller", origin: "https://keller.orangecat.ch" },
+  { id: "kivvi", name: "Kivvi", origin: "https://kivvi.orangecat.ch" },
+  { id: "loki", name: "Loki", origin: "https://loki.orangecat.ch" },
   { id: "petvity", name: "Petvity", origin: "https://petvity.orangecat.ch" },
+  { id: "printcraft", name: "PrintCraft", origin: "https://printcraft.orangecat.ch" },
+  { id: "reparaturbonus-zh", name: "Reparaturbonus Zürich", origin: "https://reparaturbonus.orangecat.ch" },
+  { id: "skif", name: "Skif", origin: "https://skif.orangecat.ch" },
   { id: "solon", name: "Solon", origin: "https://solon.orangecat.ch" },
   { id: "substrata", name: "Substrata", origin: "https://substrata.orangecat.ch" },
   { id: "surf-your-life", name: "Surf Your Life", origin: "https://surf-your-life.orangecat.ch" },
+  { id: "vitareba", name: "Vita", origin: "https://vita.orangecat.ch" },
 ];
 
 export const CALLBACK_PATH = `/api/auth/callback/${SIGNIN_PROVIDER_ID}`;

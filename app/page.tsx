@@ -23,6 +23,9 @@ export default async function SignIn({ searchParams }: { searchParams: Promise<P
           This page signs you in to a bitbaum app. Start from the app: choose
           “Continue with Google, Apple, GitHub, X or Facebook” on its sign-in page.
         </p>
+        <p className="small">
+          <a href="/privacy">Privacy</a>
+        </p>
       </main>
     );
   }
@@ -47,7 +50,7 @@ export default async function SignIn({ searchParams }: { searchParams: Promise<P
         </div>
       )}
       <p className="small">
-        <a href={app.origin}>Back to {app.name}</a>
+        <a href={app.origin}>Back to {app.name}</a> · <a href="/privacy">Privacy</a>
       </p>
     </main>
   );
