@@ -1,8 +1,16 @@
 import { describe, expect, it } from "vitest";
 import { generateKeyPairSync } from "node:crypto";
+import { readFileSync } from "node:fs";
 import { decodeJwt, decodeProtectedHeader } from "jose";
 import { readConfig } from "../lib/config";
-import { appleClientSecret, enabledUpstreams, socialProviders, UPSTREAMS } from "../lib/upstreams";
+import {
+  appleClientSecret,
+  enabledUpstreams,
+  publishedProviders,
+  socialProviders,
+  UPSTREAMS,
+  withoutClaimsRequest,
+} from "../lib/upstreams";
 import { CLIENT_APPS, redirectUri, registryProblems } from "../lib/clients";
 import { signedOAuthQuery } from "../lib/login";
 import { createSigninAuth } from "../lib/auth";
@@ -21,12 +29,23 @@ const ALL = {
   GITHUB_CLIENT_ID: "h", GITHUB_CLIENT_SECRET: "h",
   X_CLIENT_ID: "x", X_CLIENT_SECRET: "x",
   META_APP_ID: "m", META_APP_SECRET: "m",
+  MICROSOFT_CLIENT_ID: "ms", MICROSOFT_CLIENT_SECRET: "ms",
+  LINKEDIN_CLIENT_ID: "li", LINKEDIN_CLIENT_SECRET: "li",
+  DISCORD_CLIENT_ID: "d", DISCORD_CLIENT_SECRET: "d",
+  GITLAB_CLIENT_ID: "gl", GITLAB_CLIENT_SECRET: "gl",
+  SLACK_CLIENT_ID: "s", SLACK_CLIENT_SECRET: "s",
+  TWITCH_CLIENT_ID: "t", TWITCH_CLIENT_SECRET: "t",
+  REDDIT_CLIENT_ID: "r", REDDIT_CLIENT_SECRET: "r",
 };
+const ORDER = [
+  "google", "apple", "microsoft", "facebook", "github", "linkedin",
+  "twitter", "discord", "gitlab", "slack", "twitch", "reddit",
+];
 
 describe("upstream providers", () => {
   it("offers none with no env, and each one only with all of its env", () => {
     expect(enabledUpstreams({})).toEqual([]);
-    expect(enabledUpstreams(ALL).map((u) => u.id)).toEqual(["google", "apple", "github", "twitter", "facebook"]);
+    expect(enabledUpstreams(ALL).map((u) => u.id)).toEqual(ORDER);
     for (const upstream of UPSTREAMS) {
       for (const missing of upstream.env) {
         const env = { ...ALL, [missing]: "  " };
@@ -37,10 +56,52 @@ describe("upstream providers", () => {
 
   it("asks no provider for an email address", async () => {
     const providers = (await socialProviders(ALL)) as Record<string, { scope?: string[]; disableDefaultScope?: boolean }>;
-    expect(Object.keys(providers).sort()).toEqual(["apple", "facebook", "github", "google", "twitter"]);
+    expect(Object.keys(providers).sort()).toEqual([...ORDER].sort());
     for (const [id, p] of Object.entries(providers)) {
       expect(p.disableDefaultScope, id).toBe(true);
       expect((p.scope ?? []).some((s) => /email/i.test(s)), id).toBe(false);
+    }
+  });
+
+  it("syncs exactly the env every provider reads (provider-keys.yml)", () => {
+    const workflow = readFileSync(new URL("../.github/workflows/provider-keys.yml", import.meta.url), "utf8");
+    const block = workflow.split("names: >-")[1].split("signin-on:")[0];
+    expect(block.trim().split(/\s+/)).toEqual(UPSTREAMS.flatMap((u) => u.env));
+  });
+
+  it("marks Apple and X as paid, every other provider as free", () => {
+    expect(UPSTREAMS.filter((u) => !u.free).map((u) => u.id)).toEqual(["apple", "twitter"]);
+  });
+
+  it("publishes names only, in button order, and only what is switched on", () => {
+    expect(publishedProviders({})).toEqual({ providers: [] });
+    expect(publishedProviders({ GITHUB_CLIENT_ID: "h", GITHUB_CLIENT_SECRET: "h", DISCORD_CLIENT_ID: "d", DISCORD_CLIENT_SECRET: "d" })).toEqual({
+      providers: [
+        { id: "github", label: "GitHub" },
+        { id: "discord", label: "Discord" },
+      ],
+    });
+    expect(JSON.stringify(publishedProviders(ALL))).not.toMatch(/"(g|h|x|m|ms|li|d|gl|s|t|r)"/);
+  });
+
+  it("asks no provider's authorize URL for claims beyond who the person is", async () => {
+    const providers = await socialProviders(ALL);
+    const auth = await createSigninAuth({
+      database: drizzleAdapter((await createDatabase()).db, { provider: "pg", schema }),
+      env: { ...BROKER_ENV, ...ALL },
+    });
+    expect(Object.keys(providers)).toContain("twitch");
+    for (const id of Object.keys(providers)) {
+      const response = await auth.api.signInSocial({
+        body: { provider: id, callbackURL: "/" },
+        asResponse: true,
+      });
+      const { url } = (await response.json()) as { url: string };
+      // better-auth asks Twitch for the address in `claims`; /start removes it.
+      if (id === "twitch") expect(new URL(url).searchParams.get("claims")).toMatch(/email/);
+      const clean = new URL(withoutClaimsRequest(url));
+      expect(clean.searchParams.has("claims"), id).toBe(false);
+      expect(clean.searchParams.get("scope") ?? "", id).not.toMatch(/email/i);
     }
   });
 

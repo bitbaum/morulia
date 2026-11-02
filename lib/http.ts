@@ -1,7 +1,7 @@
 import { authBucket, authLimits } from "@bitbaum/accountkit/auth";
 import { clientIp, toHeaders } from "limitkit";
 import type { SigninAuth } from "./auth";
-import { upstreamById } from "./upstreams";
+import { upstreamById, withoutClaimsRequest } from "./upstreams";
 
 type Env = Record<string, string | undefined>;
 
@@ -12,6 +12,7 @@ type Env = Record<string, string | undefined>;
  *   /.well-known/openid-configuration      discovery (issuer = SIGNIN_URL)
  *   /.well-known/oauth-authorization-server the same, RFC 8414
  *   /start                                 POST from the sign-in page: begin a provider
+ *   /api/providers                         the providers switched on (a Next route, lib/upstreams.ts)
  *   /api/auth/oauth2/authorize | token | userinfo | end-session
  *   /api/auth/jwks                         the id_token signing keys
  *   /api/auth/callback/<provider>          where each provider sends people back
@@ -80,7 +81,7 @@ async function start(
   }
   const answer = (await response.json().catch(() => null)) as { url?: string } | null;
   if (!response.ok || !answer?.url) return problem("start_failed");
-  const headers = new Headers({ Location: answer.url, "Cache-Control": "no-store" });
+  const headers = new Headers({ Location: withoutClaimsRequest(answer.url), "Cache-Control": "no-store" });
   for (const cookie of response.headers.getSetCookie()) headers.append("Set-Cookie", cookie);
   return new Response(null, { status: 303, headers });
 }
