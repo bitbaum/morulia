@@ -13,7 +13,19 @@ import { importPKCS8, SignJWT } from "jose";
  */
 type Env = Record<string, string | undefined>;
 
-export type UpstreamId = "google" | "apple" | "github" | "twitter" | "facebook";
+export type UpstreamId =
+  | "google"
+  | "apple"
+  | "microsoft"
+  | "facebook"
+  | "github"
+  | "linkedin"
+  | "twitter"
+  | "discord"
+  | "gitlab"
+  | "slack"
+  | "twitch"
+  | "reddit";
 
 export interface Upstream {
   id: UpstreamId;
@@ -21,19 +33,38 @@ export interface Upstream {
   label: string;
   /** All of these must be set for the provider to be offered. */
   env: readonly string[];
+  /**
+   * Whether registering with the provider and signing people in costs us
+   * nothing. A paid provider keeps its code path (it costs nothing until its
+   * keys are set) but is never in the owner's list of steps. Sources:
+   * docs/providers.md.
+   */
+  free: boolean;
 }
 
-/** Order is the order of the buttons. */
+const pair = (prefix: string) => [`${prefix}_CLIENT_ID`, `${prefix}_CLIENT_SECRET`] as const;
+
+/** Order is the order of the buttons, and of the names in an app's button. */
 export const UPSTREAMS: readonly Upstream[] = [
-  { id: "google", label: "Google", env: ["GOOGLE_CLIENT_ID", "GOOGLE_CLIENT_SECRET"] },
+  { id: "google", label: "Google", env: pair("GOOGLE"), free: true },
   {
     id: "apple",
     label: "Apple",
     env: ["APPLE_CLIENT_ID", "APPLE_TEAM_ID", "APPLE_KEY_ID", "APPLE_PRIVATE_KEY"],
+    // Sign in with Apple needs the Apple Developer Program, 99 USD a year.
+    free: false,
   },
-  { id: "github", label: "GitHub", env: ["GITHUB_CLIENT_ID", "GITHUB_CLIENT_SECRET"] },
-  { id: "twitter", label: "X", env: ["X_CLIENT_ID", "X_CLIENT_SECRET"] },
-  { id: "facebook", label: "Facebook", env: ["META_APP_ID", "META_APP_SECRET"] },
+  { id: "microsoft", label: "Microsoft", env: pair("MICROSOFT"), free: true },
+  { id: "facebook", label: "Facebook", env: ["META_APP_ID", "META_APP_SECRET"], free: true },
+  { id: "github", label: "GitHub", env: pair("GITHUB"), free: true },
+  { id: "linkedin", label: "LinkedIn", env: pair("LINKEDIN"), free: true },
+  // The X API is pay-per-use with no free tier; each sign-in reads the user.
+  { id: "twitter", label: "X", env: pair("X"), free: false },
+  { id: "discord", label: "Discord", env: pair("DISCORD"), free: true },
+  { id: "gitlab", label: "GitLab", env: pair("GITLAB"), free: true },
+  { id: "slack", label: "Slack", env: pair("SLACK"), free: true },
+  { id: "twitch", label: "Twitch", env: pair("TWITCH"), free: true },
+  { id: "reddit", label: "Reddit", env: pair("REDDIT"), free: true },
 ];
 
 const text = (value: string | undefined) => value?.trim() || "";
@@ -126,5 +157,96 @@ export async function socialProviders(env: Env) {
       mapProfileToUser: (p: { id?: string; sub?: string }) =>
         pseudonymousUser("facebook", p.sub ?? p.id),
     };
+  if (on.has("microsoft"))
+    providers.microsoft = {
+      clientId: text(env.MICROSOFT_CLIENT_ID),
+      clientSecret: text(env.MICROSOFT_CLIENT_SECRET),
+      // Work, school and personal accounts. `profile` is the least Microsoft
+      // allows: without it the token carries no `oid`, the stable id
+      // better-auth keys the account on. No Graph call, no photo.
+      tenantId: "common",
+      disableDefaultScope: true,
+      scope: ["openid", "profile"],
+      disableProfilePhoto: true,
+      mapProfileToUser: (p: { oid?: string }) => pseudonymousUser("microsoft", p.oid),
+    };
+  if (on.has("linkedin"))
+    providers.linkedin = {
+      clientId: text(env.LINKEDIN_CLIENT_ID),
+      clientSecret: text(env.LINKEDIN_CLIENT_SECRET),
+      // userinfo answers only with `profile`; no `email`.
+      disableDefaultScope: true,
+      scope: ["openid", "profile"],
+      mapProfileToUser: (p: { sub?: string }) => pseudonymousUser("linkedin", p.sub),
+    };
+  if (on.has("discord"))
+    providers.discord = {
+      clientId: text(env.DISCORD_CLIENT_ID),
+      clientSecret: text(env.DISCORD_CLIENT_SECRET),
+      // `identify` is /users/@me without the email.
+      disableDefaultScope: true,
+      scope: ["identify"],
+      mapProfileToUser: (p: { id?: string }) => pseudonymousUser("discord", p.id),
+    };
+  if (on.has("gitlab"))
+    providers.gitlab = {
+      clientId: text(env.GITLAB_CLIENT_ID),
+      clientSecret: text(env.GITLAB_CLIENT_SECRET),
+      // better-auth reads /api/v4/user, which needs read_user and nothing more.
+      disableDefaultScope: true,
+      scope: ["read_user"],
+      mapProfileToUser: (p: { id?: number | string }) => pseudonymousUser("gitlab", p.id),
+    };
+  if (on.has("slack"))
+    providers.slack = {
+      clientId: text(env.SLACK_CLIENT_ID),
+      clientSecret: text(env.SLACK_CLIENT_SECRET),
+      disableDefaultScope: true,
+      scope: ["openid"],
+      mapProfileToUser: (p: { sub?: string; "https://slack.com/user_id"?: string }) =>
+        pseudonymousUser("slack", p["https://slack.com/user_id"] ?? p.sub),
+    };
+  if (on.has("twitch"))
+    providers.twitch = {
+      clientId: text(env.TWITCH_CLIENT_ID),
+      clientSecret: text(env.TWITCH_CLIENT_SECRET),
+      // The ID token carries `sub` by default. better-auth also sends a
+      // `claims` parameter asking for the address; /start removes it.
+      disableDefaultScope: true,
+      scope: ["openid"],
+      mapProfileToUser: (p: { sub?: string }) => pseudonymousUser("twitch", p.sub),
+    };
+  if (on.has("reddit"))
+    providers.reddit = {
+      clientId: text(env.REDDIT_CLIENT_ID),
+      clientSecret: text(env.REDDIT_CLIENT_SECRET),
+      disableDefaultScope: true,
+      scope: ["identity"],
+      mapProfileToUser: (p: { id?: string }) => pseudonymousUser("reddit", p.id),
+    };
   return providers;
+}
+
+/**
+ * What /api/providers publishes: the providers switched on, in button order,
+ * with the words an app's button names them by. Every accountkit app reads
+ * this to label "Continue with …", so an app never names a provider that is
+ * not configured here. Names only — never an id or a secret of the provider.
+ */
+export function publishedProviders(env: Env) {
+  return {
+    providers: enabledUpstreams(env).map((u) => ({ id: u.id, label: u.label })),
+  };
+}
+
+/**
+ * A provider's authorize URL with nothing in it that asks for more than who
+ * the person is. better-auth always adds a `claims` request naming `email` to
+ * some providers (Twitch) whatever the scope; it is removed here.
+ */
+export function withoutClaimsRequest(url: string): string {
+  const parsed = new URL(url);
+  if (!parsed.searchParams.has("claims")) return url;
+  parsed.searchParams.delete("claims");
+  return parsed.toString();
 }

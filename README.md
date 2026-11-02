@@ -2,8 +2,16 @@
 
 The shared bitbaum sign-in, at https://morulia.orangecat.ch (first named
 `signin`; renamed on 2026-11-01 before any app used it). One sign-in for
-bitbaum apps: "Continue with Google, Apple, GitHub, X or Facebook", run once
-for every app.
+bitbaum apps, run once for every app: "Continue with" every provider whose
+keys are set here — Google, Microsoft, Facebook, GitHub, LinkedIn, Discord,
+GitLab, Slack, Twitch and Reddit are free to add; Apple and X are supported but
+paid. Each app's button names exactly the providers this service publishes at
+`/api/providers`, never one that is not configured.
+
+**Adding a provider is pasting two repository secrets.** `docs/providers.md`
+has every provider's console, callback URL and secret names, and why each is
+or is not free. `.github/workflows/provider-keys.yml` writes the keys to the
+box and switches the button on in every app by itself.
 
 - **Each app sees a different identifier** for the same person (an OIDC
   pairwise subject), so two apps cannot join their records on it.
@@ -23,7 +31,8 @@ button "Sign in with OrangeCat"; nothing user-facing says Morulia.
 
 Endpoints: `/.well-known/openid-configuration`, `/api/auth/oauth2/authorize`
 (PKCE S256 required), `/api/auth/oauth2/token` (`client_secret_post`),
-`/api/auth/oauth2/userinfo`, `/api/auth/jwks`, `/api/health`.
+`/api/auth/oauth2/userinfo`, `/api/auth/jwks`, `/api/health`, and
+`/api/providers` (the providers switched on, with their names; public).
 
 ## Personas (future)
 

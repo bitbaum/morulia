@@ -21,6 +21,8 @@ export const BROKER_ENV = {
   GITHUB_CLIENT_SECRET: "gh-secret",
   META_APP_ID: "meta-app",
   META_APP_SECRET: "meta-secret",
+  DISCORD_CLIENT_ID: "discord-client",
+  DISCORD_CLIENT_SECRET: "discord-secret",
 };
 
 type Handler = (request: Request) => Promise<Response>;
@@ -34,7 +36,7 @@ export interface Identity {
 }
 
 /**
- * Fake GitHub and Meta: the endpoints better-auth's real provider code calls,
+ * Fake GitHub, Meta and Discord: the endpoints better-auth's real provider code calls,
  * answering for whichever identity the "browser" chose on the consent step.
  */
 export class FakeUpstreams {
@@ -68,7 +70,7 @@ export class FakeUpstreams {
   }
 
   handles(url: URL): boolean {
-    return ["github.com", "api.github.com", "graph.facebook.com"].includes(url.hostname);
+    return ["github.com", "api.github.com", "graph.facebook.com", "discord.com"].includes(url.hostname);
   }
 
   async handle(request: Request): Promise<Response> {
@@ -111,6 +113,22 @@ export class FakeUpstreams {
         email: who.email,
         email_verified: true,
         picture: { data: { url: "https://pics.example/x.png" } },
+      });
+    }
+    if (url.hostname === "discord.com" && url.pathname === "/api/oauth2/token")
+      return this.exchange(new URLSearchParams(body).get("code"));
+    if (url.hostname === "discord.com" && decodeURIComponent(url.pathname) === "/api/users/@me") {
+      const who = this.bearer(request);
+      if (!who) return new Response("{}", { status: 401 });
+      return Response.json({
+        // A snowflake: Discord ids are numbers in a string.
+        id: `9${who.id}`,
+        username: who.login,
+        global_name: who.name,
+        discriminator: "0",
+        avatar: null,
+        email: who.email,
+        verified: true,
       });
     }
     return new Response("not faked", { status: 599 });

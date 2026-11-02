@@ -16,17 +16,20 @@ export default function Privacy() {
     <main className="privacy">
       <h1>Privacy</h1>
       <p>
-        This service signs you in to bitbaum apps with Google, Apple, GitHub, X or Facebook. It
-        keeps as little as it can, and it gives every app a different identifier for you.
+        This service signs you in to bitbaum apps with an account you already have elsewhere
+        (Google, Microsoft, Facebook, GitHub and others; the sign-in page shows the ones switched
+        on). It keeps as little as it can, and it gives every app a different identifier for you.
       </p>
 
       <h2>What we ask the provider for</h2>
       {/* lib/upstreams.ts: disableDefaultScope on every provider. */}
       <p>
-        Only who you are. Google is asked for <code>openid</code>, Facebook for{" "}
-        <code>public_profile</code>, X for <code>users.read</code> and <code>tweet.read</code>, and
-        Apple and GitHub for no scope at all. We never ask for your email address. From the answer we
-        keep one thing: the provider&apos;s identifier for you.
+        Only who you are. Google, Slack and Twitch are asked for <code>openid</code>; Microsoft
+        and LinkedIn for <code>openid</code> and <code>profile</code>; Facebook for{" "}
+        <code>public_profile</code>; Discord for <code>identify</code>; GitLab for{" "}
+        <code>read_user</code>; Reddit for <code>identity</code>; X for <code>users.read</code> and{" "}
+        <code>tweet.read</code>; Apple and GitHub for no scope at all. We never ask for your email
+        address. From the answer we keep one thing: the provider&apos;s identifier for you.
       </p>
 
       <h2>What we store</h2>

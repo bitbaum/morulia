@@ -7,6 +7,7 @@ const HEIDI: ClientApp = { id: "heidi", name: "Heidi", origin: "http://localhost
 /** Two different people at two providers who report the SAME verified address. */
 const AT_GITHUB: Identity = { id: "2001", login: "owner", name: "Real Owner", email: "shared@example.com" };
 const AT_META: Identity = { id: "3001", login: "x", name: "Someone Else", email: "shared@example.com" };
+const AT_DISCORD: Identity = { id: "4001", login: "d", name: "Third Person", email: "shared@example.com" };
 
 const network = new Network();
 let broker: Broker;
@@ -17,7 +18,7 @@ beforeAll(async () => {
 });
 afterAll(() => network.uninstall());
 
-async function subjectFor(provider: "github" | "facebook", who: Identity): Promise<string> {
+async function subjectFor(provider: "github" | "facebook" | "discord", who: Identity): Promise<string> {
   const browser = new Browser(network);
   const discovery = await (await fetch(`${BROKER}/.well-known/openid-configuration`)).json();
   const { verifier, challenge } = pkce();
@@ -69,6 +70,18 @@ describe("a provider's email is never an identity", () => {
     expect(new Set(accounts.rows.map((r) => r.user_id)).size).toBe(2);
   });
 
+  it("signs a person in through Discord, asking only for `identify`", async () => {
+    const first = await subjectFor("discord", AT_DISCORD);
+    expect(await subjectFor("discord", AT_DISCORD)).toBe(first);
+    expect(first).not.toBe(await subjectFor("github", AT_GITHUB));
+    const asked = network.upstreams.seen.filter((s) => s.url.startsWith("https://discord.com/"));
+    expect(asked.map((s) => decodeURIComponent(new URL(s.url).pathname))).toContain("/api/users/@me");
+    const accounts = await broker.db.client.query<{ provider_id: string }>(
+      `select provider_id from account where provider_id = 'discord'`,
+    );
+    expect(accounts.rows).toHaveLength(1);
+  });
+
   it("gives the same person the same subject on their next sign-in", async () => {
     expect(await subjectFor("github", AT_GITHUB)).toBe(await subjectFor("github", AT_GITHUB));
   });
@@ -82,6 +95,7 @@ describe("a provider's email is never an identity", () => {
     expect(dump).not.toContain("shared@example.com");
     expect(dump).not.toContain("Real Owner");
     expect(dump).not.toContain("Someone Else");
+    expect(dump).not.toContain("Third Person");
     expect(dump).not.toContain("avatars.example");
     const emails = await broker.db.client.query<{ email: string; email_verified: boolean }>(
       `select email, email_verified from "user"`,

@@ -42,7 +42,7 @@ into this file.
 # Morulia
 
 The shared bitbaum sign-in, served at `morulia.orangecat.ch` (fleet `STACK.md`, "Identity"): one OIDC provider
-that holds the Google, Apple, GitHub, X and Meta credentials once. Every
+that holds every sign-in provider's credentials once (`docs/providers.md`). Every
 accountkit app is a client of it through `SIGNIN_ISSUER`, `SIGNIN_CLIENT_ID`
 and `SIGNIN_CLIENT_SECRET`.
 
@@ -64,7 +64,12 @@ and `SIGNIN_CLIENT_SECRET`.
     pnpm test              # vitest; Postgres is pglite, providers are faked
 
 - `lib/auth.ts` — better-auth + `@better-auth/oauth-provider` + `jwt` (RS256).
-- `lib/upstreams.ts` — the providers, each on only when all of its env is set.
+- `lib/upstreams.ts` — the providers, each on only when all of its env is set,
+  and `publishedProviders` (`/api/providers`), which every app's button reads.
+  Adding one: a row in `UPSTREAMS`, its options in `socialProviders` (no email
+  scope), its names in `.github/workflows/provider-keys.yml` (a test holds the
+  two equal), and its steps in `docs/providers.md`. Mark it `free: false` when
+  the provider charges, and say why in the doc, with the source.
 - `lib/subject.ts` — the one pairwise-subject derivation; its pinned test
   must never be edited to pass.
 - `lib/clients.ts` — the registry of client apps. Adding an app is one row.
