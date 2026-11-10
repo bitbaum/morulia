@@ -56,7 +56,7 @@ export const UPSTREAMS: readonly Upstream[] = [
   },
   { id: "microsoft", label: "Microsoft", env: pair("MICROSOFT"), free: true },
   { id: "facebook", label: "Facebook", env: ["META_APP_ID", "META_APP_SECRET"], free: true },
-  { id: "github", label: "GitHub", env: pair("GITHUB"), free: true },
+  { id: "github", label: "GitHub", env: pair("GH"), free: true },
   { id: "linkedin", label: "LinkedIn", env: pair("LINKEDIN"), free: true },
   // The X API is pay-per-use with no free tier; each sign-in reads the user.
   { id: "twitter", label: "X", env: pair("X"), free: false },
@@ -132,8 +132,8 @@ export async function socialProviders(env: Env) {
     };
   if (on.has("github"))
     providers.github = {
-      clientId: text(env.GITHUB_CLIENT_ID),
-      clientSecret: text(env.GITHUB_CLIENT_SECRET),
+      clientId: text(env.GH_CLIENT_ID),
+      clientSecret: text(env.GH_CLIENT_SECRET),
       // No scope at all: GitHub then grants read access to public profile
       // data only, and /user/emails answers 404.
       disableDefaultScope: true,
