@@ -1,5 +1,5 @@
 import { authBucket, authLimits } from "@bitbaum/accountkit/auth";
-import { clientIp, toHeaders } from "limitkit";
+import { clientIp, toHeaders } from "@bitbaum/limitkit";
 import type { SigninAuth } from "./auth";
 import { upstreamById, withoutClaimsRequest } from "./upstreams";
 
