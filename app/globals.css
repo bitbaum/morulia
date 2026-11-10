@@ -39,6 +39,10 @@ p {
   width: 100%;
   min-height: 44px;
 }
+a {
+  color: inherit;
+  text-underline-offset: 0.2em;
+}
 .small {
   margin-top: 1.5rem;
   font-size: 0.875rem;
