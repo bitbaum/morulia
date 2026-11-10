@@ -13,7 +13,12 @@ const config: NextConfig = {
         source: "/:path*",
         headers: [
           { key: "X-Frame-Options", value: "DENY" },
-          { key: "Referrer-Policy", value: "no-referrer" },
+          // NOT "no-referrer": under it a browser sends `Origin: null` on this
+          // service's own sign-in form, `start()` (lib/http.ts) requires its own
+          // origin, and every provider button ended on /problem. "same-origin"
+          // keeps the privacy that was wanted (nothing about the sign-in reaches
+          // a provider or any other site) and lets the form say where it is from.
+          { key: "Referrer-Policy", value: "same-origin" },
           { key: "X-Content-Type-Options", value: "nosniff" },
         ],
       },
