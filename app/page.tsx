@@ -1,3 +1,5 @@
+import { headers } from "next/headers";
+import { COPY, fill, pickLang } from "@/lib/copy";
 import { clientApp } from "@/lib/clients";
 import { requestingClientId, signedOAuthQuery, type PageSearchParams } from "@/lib/login";
 import { enabledUpstreams } from "@/lib/upstreams";
@@ -11,6 +13,7 @@ export const dynamic = "force-dynamic";
  */
 export default async function SignIn({ searchParams }: { searchParams: Promise<PageSearchParams> }) {
   const params = await searchParams;
+  const t = COPY[pickLang((await headers()).get("accept-language"))];
   const query = signedOAuthQuery(params);
   const app = clientApp(requestingClientId(params));
   const upstreams = enabledUpstreams(process.env);
@@ -18,13 +21,10 @@ export default async function SignIn({ searchParams }: { searchParams: Promise<P
   if (!query || !app) {
     return (
       <main>
-        <h1>bitbaum sign-in</h1>
-        <p>
-          This page signs you in to a bitbaum app. Start from the app: choose
-          its “Continue with …” button on its sign-in page.
-        </p>
+        <h1>{t.landingTitle}</h1>
+        <p>{t.landingBody}</p>
         <p className="small">
-          <a href="/privacy">Privacy</a>
+          <a href="/privacy">{t.privacy}</a>
         </p>
       </main>
     );
@@ -32,10 +32,10 @@ export default async function SignIn({ searchParams }: { searchParams: Promise<P
 
   return (
     <main>
-      <h1>Continue to {app.name}</h1>
-      <p>{app.name} gets an identifier that only it can see. Not your name, not your address.</p>
+      <h1>{fill(t.continueTo, { app: app.name })}</h1>
+      <p>{fill(t.identifierNote, { app: app.name })}</p>
       {upstreams.length === 0 ? (
-        <p>No provider is switched on yet. Go back to {app.name} and use another way in.</p>
+        <p>{fill(t.noProvider, { app: app.name })}</p>
       ) : (
         <div className="providers">
           {upstreams.map((u) => (
@@ -43,14 +43,14 @@ export default async function SignIn({ searchParams }: { searchParams: Promise<P
               <input type="hidden" name="provider" value={u.id} />
               <input type="hidden" name="oauth_query" value={query} />
               <button type="submit" className="acct-auth-button-quiet">
-                Continue with {u.label}
+                {fill(t.continueWith, { provider: u.label })}
               </button>
             </form>
           ))}
         </div>
       )}
       <p className="small">
-        <a href={app.origin}>Back to {app.name}</a> · <a href="/privacy">Privacy</a>
+        <a href={app.origin}>{fill(t.backTo, { app: app.name })}</a> · <a href="/privacy">{t.privacy}</a>
       </p>
     </main>
   );
