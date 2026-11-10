@@ -26,7 +26,7 @@ const applePem = generateKeyPairSync("ec", { namedCurve: "P-256" })
 const ALL = {
   GOOGLE_CLIENT_ID: "g", GOOGLE_CLIENT_SECRET: "g",
   APPLE_CLIENT_ID: "ch.example.signin", APPLE_TEAM_ID: "TEAM123456", APPLE_KEY_ID: "KEY1234567", APPLE_PRIVATE_KEY: applePem,
-  GITHUB_CLIENT_ID: "h", GITHUB_CLIENT_SECRET: "h",
+  GH_CLIENT_ID: "h", GH_CLIENT_SECRET: "h",
   X_CLIENT_ID: "x", X_CLIENT_SECRET: "x",
   META_APP_ID: "m", META_APP_SECRET: "m",
   MICROSOFT_CLIENT_ID: "ms", MICROSOFT_CLIENT_SECRET: "ms",
@@ -75,7 +75,7 @@ describe("upstream providers", () => {
 
   it("publishes names only, in button order, and only what is switched on", () => {
     expect(publishedProviders({})).toEqual({ providers: [] });
-    expect(publishedProviders({ GITHUB_CLIENT_ID: "h", GITHUB_CLIENT_SECRET: "h", DISCORD_CLIENT_ID: "d", DISCORD_CLIENT_SECRET: "d" })).toEqual({
+    expect(publishedProviders({ GH_CLIENT_ID: "h", GH_CLIENT_SECRET: "h", DISCORD_CLIENT_ID: "d", DISCORD_CLIENT_SECRET: "d" })).toEqual({
       providers: [
         { id: "github", label: "GitHub" },
         { id: "discord", label: "Discord" },

@@ -39,7 +39,7 @@ provider only who the person is, never for an email address (README, AGENTS.md).
 | Google | `google` | `GOOGLE_CLIENT_ID`, `GOOGLE_CLIENT_SECRET` | yes |
 | Microsoft | `microsoft` | `MICROSOFT_CLIENT_ID`, `MICROSOFT_CLIENT_SECRET` | yes |
 | Facebook | `facebook` | `META_APP_ID`, `META_APP_SECRET` | yes |
-| GitHub | `github` | `GITHUB_CLIENT_ID`, `GITHUB_CLIENT_SECRET` | yes |
+| GitHub | `github` | `GH_CLIENT_ID`, `GH_CLIENT_SECRET` | yes |
 | LinkedIn | `linkedin` | `LINKEDIN_CLIENT_ID`, `LINKEDIN_CLIENT_SECRET` | yes |
 | Discord | `discord` | `DISCORD_CLIENT_ID`, `DISCORD_CLIENT_SECRET` | yes |
 | GitLab | `gitlab` | `GITLAB_CLIENT_ID`, `GITLAB_CLIENT_SECRET` | yes |
@@ -96,8 +96,10 @@ https://github.com/organizations/bitbaum/settings/applications/new (an OAuth app
 
 1. Application name `bitbaum sign-in`. Homepage URL `https://morulia.orangecat.ch`.
 2. Authorization callback URL: `https://morulia.orangecat.ch/api/auth/callback/github`. Leave "Enable Device Flow" off.
-3. Click **Register application**. Copy the **Client ID** into the secret `GITHUB_CLIENT_ID`.
-4. Click **Generate a new client secret**, and copy it into `GITHUB_CLIENT_SECRET`.
+3. Click **Register application**. Copy the **Client ID** into the secret `GH_CLIENT_ID`.
+4. Click **Generate a new client secret**, and copy it into `GH_CLIENT_SECRET`.
+
+The names are `GH_CLIENT_ID` and `GH_CLIENT_SECRET`, not `GITHUB_*`: GitHub Actions refuses any secret name that starts with `GITHUB_`.
 
 There is no scope to choose. Morulia asks for none, so GitHub grants read access to public profile data only.
 
