@@ -48,6 +48,47 @@ a {
   font-size: 0.875rem;
   color: hsl(var(--text-tertiary));
 }
+/* The sign-in card carries the app the person came from (lib/clients.ts). */
+main.signin {
+  width: calc(100% - 2rem);
+  margin-top: 2rem;
+  padding: 2rem 1.5rem;
+  max-width: 26rem;
+  background: hsl(var(--surface-base));
+  border: 1px solid hsl(var(--border-subtle));
+  border-top: 4px solid var(--client-accent, hsl(var(--border-subtle)));
+  border-radius: 12px;
+}
+.client {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  margin-bottom: 1.5rem;
+}
+.client-logo {
+  width: 40px;
+  height: 40px;
+  border-radius: 10px;
+  object-fit: contain;
+  flex: none;
+}
+.client-letter {
+  display: grid;
+  place-items: center;
+  font-weight: 600;
+  color: hsl(var(--text-primary));
+  background: hsl(var(--surface-hover));
+  box-shadow: inset 0 0 0 2px var(--client-accent, transparent);
+}
+.client-name {
+  font-weight: 600;
+  color: hsl(var(--text-primary));
+}
+.providers .note {
+  margin: 0.25rem 0 0;
+  font-size: 0.875rem;
+  color: hsl(var(--text-tertiary));
+}
 main.privacy {
   max-width: 40rem;
 }

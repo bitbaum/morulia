@@ -1,5 +1,6 @@
+import type { CSSProperties } from "react";
 import { headers } from "next/headers";
-import { COPY, fill, pickLang } from "@/lib/copy";
+import { COPY, fill, listOf, pickLang } from "@/lib/copy";
 import { clientApp } from "@/lib/clients";
 import { requestingClientId, signedOAuthQuery, type PageSearchParams } from "@/lib/login";
 import { enabledUpstreams } from "@/lib/upstreams";
@@ -13,7 +14,8 @@ export const dynamic = "force-dynamic";
  */
 export default async function SignIn({ searchParams }: { searchParams: Promise<PageSearchParams> }) {
   const params = await searchParams;
-  const t = COPY[pickLang((await headers()).get("accept-language"))];
+  const lang = pickLang((await headers()).get("accept-language"));
+  const t = COPY[lang];
   const query = signedOAuthQuery(params);
   const app = clientApp(requestingClientId(params));
   const upstreams = enabledUpstreams(process.env);
@@ -30,8 +32,22 @@ export default async function SignIn({ searchParams }: { searchParams: Promise<P
     );
   }
 
+  // The app's own brand, from its row in lib/clients.ts: the person came from
+  // Heidi and should still see Heidi here, not an anonymous form.
+  const style = app.accent ? ({ "--client-accent": app.accent } as CSSProperties) : undefined;
   return (
-    <main>
+    <main className="signin" style={style}>
+      <header className="client">
+        {app.logo ? (
+          // eslint-disable-next-line @next/next/no-img-element -- another origin's icon, no optimiser
+          <img className="client-logo" src={app.logo} alt="" width={40} height={40} />
+        ) : (
+          <span className="client-logo client-letter" aria-hidden="true">
+            {app.name.slice(0, 1).toUpperCase()}
+          </span>
+        )}
+        <span className="client-name">{app.name}</span>
+      </header>
       <h1>{fill(t.continueTo, { app: app.name })}</h1>
       <p>{fill(t.identifierNote, { app: app.name })}</p>
       {upstreams.length === 0 ? (
@@ -47,6 +63,9 @@ export default async function SignIn({ searchParams }: { searchParams: Promise<P
               </button>
             </form>
           ))}
+          <p className="note">
+            {fill(t.sharedNameNote, { app: app.name, providers: listOf(lang, upstreams.map((u) => u.label)) })}
+          </p>
         </div>
       )}
       <p className="small">

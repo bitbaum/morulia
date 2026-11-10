@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { COPY, LANGS, fill, pickLang } from "../lib/copy";
+import { COPY, LANGS, fill, listOf, pickLang } from "../lib/copy";
 
 describe("pickLang", () => {
   it("follows the browser's own order and weights", () => {
@@ -31,6 +31,8 @@ describe("the copy", () => {
       expect(c.identifierNote).toContain("{app}");
       expect(c.continueWith).toContain("{provider}");
       expect(c.backTo).toContain("{app}");
+      expect(c.sharedNameNote).toContain("{app}");
+      expect(c.sharedNameNote).toContain("{providers}");
     }
   });
   it("fills every placeholder", () => {
@@ -38,5 +40,13 @@ describe("the copy", () => {
       const text = fill(COPY[lang].identifierNote + COPY[lang].noProvider, { app: "Heidi" });
       expect(text).not.toMatch(/\{app\}/);
     }
+  });
+});
+
+describe("listOf", () => {
+  it("joins providers the way the visitor's language does", () => {
+    expect(listOf("en", ["Google", "GitHub"])).toBe("Google and GitHub");
+    expect(listOf("de", ["Google", "GitHub"])).toBe("Google und GitHub");
+    expect(listOf("en", ["GitHub"])).toBe("GitHub");
   });
 });

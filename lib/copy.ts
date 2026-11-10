@@ -20,6 +20,12 @@ export type Copy = {
   identifierNote: string;
   /** `{provider}` */
   continueWith: string;
+  /**
+   * `{providers}` `{app}`. Google's account chooser names the shared
+   * service's domain and GitHub's consent screen its OAuth app, never the
+   * app the person came from; said here once so neither looks like a detour.
+   */
+  sharedNameNote: string;
   /** `{app}` */
   noProvider: string;
   /** `{app}` */
@@ -38,6 +44,7 @@ export const COPY: Record<Lang, Copy> = {
     continueTo: "Continue to {app}",
     identifierNote: "{app} gets an identifier that only it can see. Not your name, not your address.",
     continueWith: "Continue with {provider}",
+    sharedNameNote: "{providers} will show the shared sign-in service, not {app}. That is expected.",
     noProvider: "No provider is switched on yet. Go back to {app} and use another way in.",
     backTo: "Back to {app}",
     privacy: "Privacy",
@@ -56,6 +63,7 @@ export const COPY: Record<Lang, Copy> = {
     continueTo: "Weiter zu {app}",
     identifierNote: "{app} erhält eine Kennung, die nur {app} sehen kann. Weder Ihren Namen noch Ihre Adresse.",
     continueWith: "Weiter mit {provider}",
+    sharedNameNote: "Bei {providers} erscheint der gemeinsame Anmeldedienst, nicht {app}. Das ist so vorgesehen.",
     noProvider: "Noch ist kein Anbieter eingeschaltet. Gehen Sie zurück zu {app} und wählen Sie einen anderen Weg.",
     backTo: "Zurück zu {app}",
     privacy: "Datenschutz",
@@ -74,6 +82,7 @@ export const COPY: Record<Lang, Copy> = {
     continueTo: "Continuer vers {app}",
     identifierNote: "{app} reçoit un identifiant que seule {app} peut voir. Ni votre nom, ni votre adresse.",
     continueWith: "Continuer avec {provider}",
+    sharedNameNote: "Chez {providers}, vous verrez le service de connexion partagé, pas {app}. C’est normal.",
     noProvider: "Aucun fournisseur n’est encore activé. Retournez à {app} et choisissez une autre façon d’entrer.",
     backTo: "Retour à {app}",
     privacy: "Confidentialité",
@@ -92,6 +101,7 @@ export const COPY: Record<Lang, Copy> = {
     continueTo: "Continua su {app}",
     identifierNote: "{app} riceve un identificativo che solo {app} può vedere. Né il tuo nome né il tuo indirizzo.",
     continueWith: "Continua con {provider}",
+    sharedNameNote: "Su {providers} vedrai il servizio di accesso condiviso, non {app}. È previsto.",
     noProvider: "Nessun provider è ancora attivo. Torna a {app} e scegli un altro modo di accedere.",
     backTo: "Torna a {app}",
     privacy: "Privacy",
@@ -110,6 +120,7 @@ export const COPY: Record<Lang, Copy> = {
     continueTo: "Продолжить в {app}",
     identifierNote: "{app} получает идентификатор, который видит только {app}. Ни вашего имени, ни вашего адреса.",
     continueWith: "Продолжить через {provider}",
+    sharedNameNote: "На странице {providers} будет указан общий сервис входа, а не {app}. Так и задумано.",
     noProvider: "Ни один способ входа ещё не включён. Вернитесь в {app} и выберите другой.",
     backTo: "Назад в {app}",
     privacy: "Конфиденциальность",
@@ -128,6 +139,7 @@ export const COPY: Record<Lang, Copy> = {
     continueTo: "Vinavant a {app}",
     identifierNote: "{app} survegn in identificatur che be {app} po vesair. Ni voss num ni vossa adressa.",
     continueWith: "Vinavant cun {provider}",
+    sharedNameNote: "Tar {providers} vesais Vus il servetsch d’annunzia cuminaivel, betg {app}. Quai è previs.",
     noProvider: "Anc nagin purschider n’è activà. Turnai ad {app} e tscherni in auter mod d’entrar.",
     backTo: "Enavos tar {app}",
     privacy: "Protecziun da datas",
@@ -162,6 +174,15 @@ export function pickLang(header: string | null | undefined): Lang {
     if ((LANGS as readonly string[]).includes(lang)) return lang as Lang;
   }
   return "en";
+}
+
+/** "Google and GitHub", in the visitor's language. */
+export function listOf(lang: Lang, items: readonly string[]): string {
+  try {
+    return new Intl.ListFormat(lang, { style: "long", type: "conjunction" }).format(items);
+  } catch {
+    return items.join(", ");
+  }
 }
 
 export function fill(template: string, values: Record<string, string>): string {

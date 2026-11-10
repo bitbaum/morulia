@@ -29,29 +29,50 @@ export interface ClientApp {
   name: string;
   /** The app's public origin, exactly as its BETTER_AUTH_URL / site.url. */
   origin: string;
+  /**
+   * The app's own icon, on its own origin, shown beside "Continue to <name>".
+   * Taken from the icon the app's live home page links (checked 2026-11-10).
+   * Absent → a letter tile in the neutral colours.
+   */
+  logo?: string;
+  /**
+   * The app's accent, `#rrggbb`, from a colour the app itself ships (its icon
+   * or its design tokens; the source is noted on the row). Used only for the
+   * page's edge and the logo tile, never for text, so contrast is never at
+   * stake. Absent → the neutral page.
+   */
+  accent?: string;
 }
 
 export const CLIENT_APPS: readonly ClientApp[] = [
-  { id: "aoz-begleitung", name: "AOZ Begleitung", origin: "https://aoz.orangecat.ch" },
-  { id: "biaslens", name: "BiasLens", origin: "https://biaslens.orangecat.ch" },
-  { id: "botsmann", name: "Botsmann", origin: "https://botsmann.orangecat.ch" },
-  { id: "causius", name: "Causius", origin: "https://causius.orangecat.ch" },
-  { id: "datacat", name: "DataCat", origin: "https://datacat.orangecat.ch" },
-  { id: "diplodoctor", name: "Diplodoctor", origin: "https://diplodoctor.orangecat.ch" },
-  { id: "evig", name: "evig", origin: "https://evig.orangecat.ch" },
-  { id: "heidi", name: "Heidi", origin: "https://heidi.orangecat.ch" },
-  { id: "hirnli", name: "hirnli", origin: "https://hirnli.orangecat.ch" },
+  // accent: the fill of its icon.svg
+  { id: "aoz-begleitung", name: "AOZ Begleitung", origin: "https://aoz.orangecat.ch", logo: "https://aoz.orangecat.ch/icon.svg", accent: "#e63946" },
+  { id: "biaslens", name: "BiasLens", origin: "https://biaslens.orangecat.ch", logo: "https://biaslens.orangecat.ch/icon" },
+  { id: "botsmann", name: "Botsmann", origin: "https://botsmann.orangecat.ch", logo: "https://botsmann.orangecat.ch/icon.svg" },
+  // accent: the fill of its icon.svg
+  { id: "causius", name: "Causius", origin: "https://causius.orangecat.ch", logo: "https://causius.orangecat.ch/icon.svg", accent: "#ff5c00" },
+  { id: "datacat", name: "DataCat", origin: "https://datacat.orangecat.ch", logo: "https://datacat.orangecat.ch/icon.svg" },
+  // accent: the fill of its icon.svg
+  { id: "diplodoctor", name: "Diplodoctor", origin: "https://diplodoctor.orangecat.ch", logo: "https://diplodoctor.orangecat.ch/icon.svg", accent: "#ff5c00" },
+  { id: "evig", name: "evig", origin: "https://evig.orangecat.ch", logo: "https://evig.orangecat.ch/apple-icon.png" },
+  { id: "heidi", name: "Heidi", origin: "https://heidi.orangecat.ch", logo: "https://heidi.orangecat.ch/icon.svg" },
+  { id: "hirnli", name: "hirnli", origin: "https://hirnli.orangecat.ch", logo: "https://hirnli.orangecat.ch/favicon.ico" },
   { id: "keller", name: "Keller", origin: "https://keller.orangecat.ch" },
-  { id: "kivvi", name: "Kivvi", origin: "https://kivvi.orangecat.ch" },
-  { id: "loki", name: "Loki", origin: "https://loki.orangecat.ch" },
-  { id: "petvity", name: "Petvity", origin: "https://petvity.orangecat.ch" },
-  { id: "printcraft", name: "PrintCraft", origin: "https://printcraft.orangecat.ch" },
-  { id: "reparaturbonus-zh", name: "Reparaturbonus Zürich", origin: "https://reparaturbonus.orangecat.ch" },
-  { id: "skif", name: "Skif", origin: "https://skif.orangecat.ch" },
-  { id: "solon", name: "Solon", origin: "https://solon.orangecat.ch" },
-  { id: "substrata", name: "Substrata", origin: "https://substrata.orangecat.ch" },
-  { id: "surf-your-life", name: "Surf Your Life", origin: "https://surf-your-life.orangecat.ch" },
-  { id: "vitareba", name: "Vita", origin: "https://vita.orangecat.ch" },
+  // accent: the stroke of its icon.svg
+  { id: "kivvi", name: "Kivvi", origin: "https://kivvi.orangecat.ch", logo: "https://kivvi.orangecat.ch/icon.svg", accent: "#4a8c2a" },
+  { id: "loki", name: "Loki", origin: "https://loki.orangecat.ch", logo: "https://loki.orangecat.ch/icon.svg" },
+  // accent: lib/config/design-tokens.ts `accent`
+  { id: "petvity", name: "Petvity", origin: "https://petvity.orangecat.ch", logo: "https://petvity.orangecat.ch/icon.svg", accent: "#b8502a" },
+  { id: "printcraft", name: "PrintCraft", origin: "https://printcraft.orangecat.ch", logo: "https://printcraft.orangecat.ch/icon.svg" },
+  { id: "reparaturbonus-zh", name: "Reparaturbonus Zürich", origin: "https://reparaturbonus.orangecat.ch", logo: "https://reparaturbonus.orangecat.ch/logo/favicon_48.png" },
+  // accent: src/app/globals.css `--accent`
+  { id: "skif", name: "Skif", origin: "https://skif.orangecat.ch", logo: "https://skif.orangecat.ch/icon.svg", accent: "#2f5d50" },
+  { id: "solon", name: "Solon", origin: "https://solon.orangecat.ch", logo: "https://solon.orangecat.ch/favicon.ico" },
+  // accent: the fill of its icon.svg
+  { id: "substrata", name: "Substrata", origin: "https://substrata.orangecat.ch", logo: "https://substrata.orangecat.ch/icon.svg", accent: "#4f8a80" },
+  { id: "surf-your-life", name: "Surf Your Life", origin: "https://surf-your-life.orangecat.ch", logo: "https://surf-your-life.orangecat.ch/icon.svg" },
+  // accent: the fill of its icon.svg
+  { id: "vitareba", name: "Vita", origin: "https://vita.orangecat.ch", logo: "https://vita.orangecat.ch/icon.svg", accent: "#2a7a8a" },
 ];
 
 export const CALLBACK_PATH = `/api/auth/callback/${SIGNIN_PROVIDER_ID}`;
@@ -87,6 +108,20 @@ export function registryProblems(apps: readonly ClientApp[]): string[] {
       hosts.add(url.host);
     }
     if (!app.name.trim()) problems.push(`${app.id}: name is empty`);
+    if (app.logo !== undefined) {
+      let logo: URL | null = null;
+      try {
+        logo = new URL(app.logo);
+      } catch {
+        problems.push(`${app.id}: logo is not a URL`);
+      }
+      // The app's own icon only: a logo from anywhere else is a third party
+      // learning who is signing in to what.
+      if (logo && url && logo.origin !== url.origin)
+        problems.push(`${app.id}: logo must be on the app's own origin`);
+    }
+    if (app.accent !== undefined && !/^#[0-9a-f]{6}$/.test(app.accent))
+      problems.push(`${app.id}: accent must be #rrggbb, lowercase`);
   }
   return problems;
 }
