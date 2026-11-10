@@ -154,6 +154,14 @@ describe("client registry", () => {
 
   it("refuses plain http, paths and bad ids", () => {
     expect(registryProblems([{ id: "A b", name: "x", origin: "http://x.example/path" }])).toHaveLength(3);
+    expect(
+      registryProblems([
+        { id: "a-app", name: "A", origin: "https://a.example", logo: "https://cdn.example/a.svg", accent: "#ABCDEF" },
+      ]),
+    ).toEqual(["a-app: logo must be on the app's own origin", "a-app: accent must be #rrggbb, lowercase"]);
+    expect(
+      registryProblems([{ id: "a-app", name: "A", origin: "https://a.example", logo: "https://a.example/icon.svg", accent: "#abcdef" }]),
+    ).toEqual([]);
   });
 });
 
