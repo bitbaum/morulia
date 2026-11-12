@@ -1,6 +1,6 @@
 import type { CSSProperties } from "react";
 import { headers } from "next/headers";
-import { COPY, fill, listOf, pickLang } from "@/lib/copy";
+import { COPY, fill, listOf, pickLangFor } from "@/lib/copy";
 import { clientApp } from "@/lib/clients";
 import { requestingClientId, signedOAuthQuery, type PageSearchParams } from "@/lib/login";
 import { enabledUpstreams } from "@/lib/upstreams";
@@ -14,7 +14,8 @@ export const dynamic = "force-dynamic";
  */
 export default async function SignIn({ searchParams }: { searchParams: Promise<PageSearchParams> }) {
   const params = await searchParams;
-  const lang = pickLang((await headers()).get("accept-language"));
+  // The language the app was showing (its `ui_locales`), then the browser's.
+  const lang = pickLangFor(params.ui_locales, (await headers()).get("accept-language"));
   const t = COPY[lang];
   const query = signedOAuthQuery(params);
   const app = clientApp(requestingClientId(params));
@@ -22,7 +23,7 @@ export default async function SignIn({ searchParams }: { searchParams: Promise<P
 
   if (!query || !app) {
     return (
-      <main>
+      <main lang={lang}>
         <h1>{t.landingTitle}</h1>
         <p>{t.landingBody}</p>
         <p className="small">
@@ -36,7 +37,7 @@ export default async function SignIn({ searchParams }: { searchParams: Promise<P
   // Heidi and should still see Heidi here, not an anonymous form.
   const style = app.accent ? ({ "--client-accent": app.accent } as CSSProperties) : undefined;
   return (
-    <main className="signin" style={style}>
+    <main className="signin" style={style} lang={lang}>
       <header className="client">
         {app.logo ? (
           // eslint-disable-next-line @next/next/no-img-element -- another origin's icon, no optimiser

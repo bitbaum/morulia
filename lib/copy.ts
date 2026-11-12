@@ -4,9 +4,11 @@
  * Every bitbaum app has its own language (Heidi is German, Swiss and Russian
  * and French and Italian and Romansh), and this page is the one screen in the
  * middle of every sign-in. It used to be English only, so a German reader
- * pressed a German button and landed on an English page. The language is read
- * from the browser's own preference (`Accept-Language`): nothing is stored,
- * nothing is asked, and a language not listed here falls back to English.
+ * pressed a German button and landed on an English page. The language is the
+ * one the app was showing, sent as the OIDC `ui_locales` parameter of its
+ * authorize request (AccountKit sends it); without one it is read from the
+ * browser's own preference (`Accept-Language`). Nothing is stored, nothing is
+ * asked, and a language not listed here falls back to English.
  *
  * Swiss German visitors get Standard German, like the apps' account screens.
  */
@@ -174,6 +176,23 @@ export function pickLang(header: string | null | undefined): Lang {
     if ((LANGS as readonly string[]).includes(lang)) return lang as Lang;
   }
   return "en";
+}
+
+/**
+ * The page's language: the app's `ui_locales` first, then the browser.
+ *
+ * A reader on Heidi's German pages with an English browser pressed a German
+ * button and got this page in English. The app knows which language it was
+ * showing; the browser only knows the reader's default. `ui_locales` is a
+ * space-separated list in order of preference (OIDC Core 3.1.2.1).
+ */
+export function pickLangFor(uiLocales: string | string[] | null | undefined, acceptLanguage: string | null | undefined): Lang {
+  const hint = (Array.isArray(uiLocales) ? uiLocales.join(" ") : (uiLocales ?? "")).trim().split(/\s+/).filter(Boolean);
+  if (hint.length > 0) {
+    const fromApp = pickLang(hint.join(","));
+    if (fromApp !== "en" || hint.some((tag) => tag.toLowerCase().split("-")[0] === "en")) return fromApp;
+  }
+  return pickLang(acceptLanguage);
 }
 
 /** "Google and GitHub", in the visitor's language. */
