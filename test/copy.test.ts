@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { COPY, LANGS, fill, listOf, pickLang } from "../lib/copy";
+import { COPY, LANGS, fill, listOf, pickLang, pickLangFor } from "../lib/copy";
 
 describe("pickLang", () => {
   it("follows the browser's own order and weights", () => {
@@ -17,6 +17,23 @@ describe("pickLang", () => {
     expect(pickLang(null)).toBe("en");
     expect(pickLang("de;q=0")).toBe("en");
     expect(pickLang("¿?;;,,")).toBe("en");
+  });
+});
+
+describe("pickLangFor", () => {
+  it("speaks the app's language over the browser's", () => {
+    expect(pickLangFor("de-CH", "en-US,en;q=0.9")).toBe("de");
+    expect(pickLangFor("gsw de", "en")).toBe("de");
+    expect(pickLangFor(["it"], "en")).toBe("it");
+    expect(pickLangFor("en", "de-CH")).toBe("en");
+  });
+  it("takes the first of the app's languages it has words for", () => {
+    expect(pickLangFor("ja rm de", "en")).toBe("rm");
+  });
+  it("falls back to the browser when the app sends nothing usable", () => {
+    expect(pickLangFor(undefined, "fr-CH")).toBe("fr");
+    expect(pickLangFor("", "ru")).toBe("ru");
+    expect(pickLangFor("ja", "fr")).toBe("fr");
   });
 });
 
